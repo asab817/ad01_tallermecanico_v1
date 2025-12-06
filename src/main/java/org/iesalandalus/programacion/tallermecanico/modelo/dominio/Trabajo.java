@@ -12,14 +12,31 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 
+// 1. ANOTACIONES PARA POLIMORFISMO (Serialización/Deserialización de Mecanico o Revisión)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "tipo"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Revision.class, name = "Revision"), // YYYYY y AAAAA
+        @JsonSubTypes.Type(value = Mecanico.class, name = "Mecanico") // ZZZZZ y BBBBB
+})
 public abstract class Trabajo {
     public static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final float FACTOR_DIA = 10F;
 
     private Cliente cliente;
     private Vehiculo vehiculo;
+
+    // 2. ANOTACIÓN PARA FORMATO DE FECHA (LocalDate)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaInicio;
+
+    // 2. ANOTACIÓN PARA FORMATO DE FECHA (LocalDate)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaFin;
+
     private int horas;
 
     protected Trabajo(){}
@@ -40,6 +57,8 @@ public abstract class Trabajo {
         horas = trabajo.horas;
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS ESTÁTICOS Y DE UTILIDAD
+    @JsonIgnore
     public static Trabajo copiar(Trabajo trabajo) {
         Objects.requireNonNull(trabajo, "El trabajo no puede ser nulo.");
         Trabajo trabajoCopiado = null;
@@ -51,6 +70,8 @@ public abstract class Trabajo {
         return trabajoCopiado;
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS ESTÁTICOS Y DE UTILIDAD
+    @JsonIgnore
     public static Trabajo get(Vehiculo vehiculo) {
         Objects.requireNonNull(vehiculo, "El vehículo no puede ser nulo.");
         return new Revision(Cliente.get("11111111H"), vehiculo, LocalDate.now());
@@ -115,6 +136,8 @@ public abstract class Trabajo {
         this.horas += horas;
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS AFECTADOS POR EL USO DE OTROS
+    @JsonIgnore
     public boolean estaCerrado() {
         return fechaFin != null;
     }
@@ -126,19 +149,26 @@ public abstract class Trabajo {
         setFechaFin(fechaFin);
     }
 
-
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS AFECTADOS POR EL USO DE OTROS (Calculados)
+    @JsonIgnore
     public float getPrecio() {
         return getPrecioFijo() + getPrecioEspecifico();
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS AFECTADOS POR EL USO DE OTROS (Calculados)
+    @JsonIgnore
     private float getPrecioFijo() {
         return (estaCerrado()) ? FACTOR_DIA * getDias() : 0;
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS AFECTADOS POR EL USO DE OTROS (Calculados)
+    @JsonIgnore
     private float getDias() {
         return (estaCerrado()) ? (int) ChronoUnit.DAYS.between(fechaInicio, fechaFin) : 0;
     }
 
+    // 3. ANOTACIÓN PARA IGNORAR MÉTODOS ABSTRACTOS
+    @JsonIgnore
     public abstract float getPrecioEspecifico();
 
     @Override
