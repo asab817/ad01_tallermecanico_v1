@@ -17,7 +17,7 @@ public class Main {
     private static Pair<FabricaVista, FabricaFuenteDatos> procesarArgumentos(String[] args) {
         FabricaVista fabricaVista = FabricaVista.VENTANAS;
 
-        // 1. POR DEFECTO: se considera que se operará sobre FICHEROS_JSON
+        
         FabricaFuenteDatos fabricaFuenteDatos = FabricaFuenteDatos.FICHEROS_JSON;
 
         for (String argumento : args) {
