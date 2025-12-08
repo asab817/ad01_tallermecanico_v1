@@ -3,6 +3,7 @@ package org.iesalandalus.programacion.tallermecanico.modelo.negocio;
 import org.iesalandalus.programacion.tallermecanico.modelo.TallerMecanicoExcepcion;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.Vehiculo;
 
+import java.io.IOException; // Importación necesaria
 import java.util.List;
 
 public interface IVehiculos {
@@ -11,11 +12,11 @@ public interface IVehiculos {
 
     void terminar();
 
-    List<Vehiculo> get();
+    List<Vehiculo> get() throws IOException;
 
-    void insertar(Vehiculo vehiculo) throws TallerMecanicoExcepcion;
+    void insertar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException;
 
-    Vehiculo buscar(Vehiculo vehiculo);
+    Vehiculo buscar(Vehiculo vehiculo) throws IOException;
 
-    void borrar(Vehiculo vehiculo) throws TallerMecanicoExcepcion;
+    void borrar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException;
 }
