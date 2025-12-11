@@ -1,52 +1,41 @@
-package org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json;
+package org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficherosxml;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.iesalandalus.programacion.tallermecanico.modelo.TallerMecanicoExcepcion;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.*;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ITrabajos;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
-
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "tipo"
-)
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Revision.class, name = "Revision"),
-        @JsonSubTypes.Type(value = Mecanico.class, name = "Mecanico")
-})
-
 
 public class Trabajos implements ITrabajos {
 
-    private static final String RUTA_DIRECTORIO = "datos" + File.separator + "ficheros" + File.separator + "json";
-    private static final String FICHERO_TRABAJOS = RUTA_DIRECTORIO + File.separator + "trabajos.json";
-
-    private static final ObjectMapper MAPPER = crearMapper();
+    private static final String FICHERO_TRABAJOS = String.format("%s%s%s%s%s%s%s", "datos", File.separator, "ficheros", File.separator, "xml", File.separator, "trabajos.xml");
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final String RAIZ = "trabajos";
+    private static final String TRABAJO = "trabajo";
+    private static final String CLIENTE = "cliente";
+    private static final String VEHICULO = "vehiculo";
+    private static final String FECHA_INICIO = "fechaInicio";
+    private static final String FECHA_FIN = "fechaFin";
+    private static final String HORAS = "horas";
+    private static final String PRECIO_MATERIAL = "precioMaterial";
+    private static final String TIPO = "tipo";
+    private static final String REVISION = "revision";
+    private static final String MECANICO = "mecanico";
 
     private final List<Trabajo> coleccionTrabajos;
     private static Trabajos instancia;
 
     private Trabajos() {
         coleccionTrabajos = new ArrayList<>();
-    }
-
-    private static ObjectMapper crearMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        return mapper;
     }
 
     static Trabajos getInstancia() {
@@ -58,27 +47,95 @@ public class Trabajos implements ITrabajos {
 
     @Override
     public void comenzar() {
-        coleccionTrabajos.clear();
-        Path rutaFichero = Paths.get(FICHERO_TRABAJOS);
-        if (Files.exists(rutaFichero)) {
+        Document documentoXml = UtilidadesXml.leerDocumentoXml(FICHERO_TRABAJOS);
+        if (documentoXml != null) {
+            procesarDocumentoXml(documentoXml);
+            System.out.printf("Fichero %s leído correctamente.%n", FICHERO_TRABAJOS);
+        }
+    }
+
+    private void procesarDocumentoXml(Document documentoXml) {
+        NodeList alquileres = documentoXml.getElementsByTagName(TRABAJO);
+        for (int i = 0; i < alquileres.getLength(); i++) {
+            Node trabajo = alquileres.item(i);
             try {
-                List<Trabajo> trabajos = MAPPER.readValue(rutaFichero.toFile(), new TypeReference<List<Trabajo>>() {});
-                coleccionTrabajos.addAll(trabajos);
-                System.out.printf("Fichero %s leído correctamente.%n", FICHERO_TRABAJOS);
-            } catch (IOException e) {
-                System.out.printf("Error al leer el fichero %s. --> %s%n", FICHERO_TRABAJOS, e.getMessage());
+                if (trabajo.getNodeType() == Node.ELEMENT_NODE) {
+                    insertar(getTrabajo((Element) trabajo));
+                }
+            } catch (TallerMecanicoExcepcion | IllegalArgumentException | NullPointerException |
+                     DateTimeParseException e) {
+                System.out.printf("Error al leer el trabajo %d. --> %s%n", i, e.getMessage());
             }
         }
     }
 
+    private Trabajo getTrabajo(Element elemento) throws TallerMecanicoExcepcion {
+        Cliente cliente = Cliente.get(elemento.getAttribute(CLIENTE));
+        cliente = Clientes.getInstancia().buscar(cliente);
+        Vehiculo vehiculo = Vehiculo.get(elemento.getAttribute(VEHICULO));
+        vehiculo = Vehiculos.getInstancia().buscar(vehiculo);
+        LocalDate fechaInicio = LocalDate.parse(elemento.getAttribute(FECHA_INICIO), FORMATO_FECHA);
+        String tipo = elemento.getAttribute(TIPO);
+        Trabajo trabajo = null;
+        if (tipo.equals(REVISION)) {
+            trabajo = new Revision(cliente, vehiculo, fechaInicio);
+        } else if (tipo.equals(MECANICO)) {
+            trabajo = new Mecanico(cliente, vehiculo, fechaInicio);
+            if (elemento.hasAttribute(PRECIO_MATERIAL)) {
+                ((Mecanico) trabajo).anadirPrecioMaterial(Float.parseFloat(elemento.getAttribute(PRECIO_MATERIAL)));
+            }
+        }
+        if (elemento.hasAttribute(HORAS) && trabajo != null) {
+            int horas = Integer.parseInt(elemento.getAttribute(HORAS));
+            trabajo.anadirHoras(horas);
+        }
+        if (elemento.hasAttribute(FECHA_FIN) && trabajo != null) {
+            LocalDate fechaFin = LocalDate.parse(elemento.getAttribute(FECHA_FIN), FORMATO_FECHA);
+            trabajo.cerrar(fechaFin);
+        }
+        return trabajo;
+    }
+
     @Override
     public void terminar() {
-        try {
-            Files.createDirectories(Paths.get(RUTA_DIRECTORIO));
-            MAPPER.writeValue(Paths.get(FICHERO_TRABAJOS).toFile(), coleccionTrabajos);
-        } catch (IOException e) {
-            System.out.printf("Error al escribir en el fichero %s. --> %s%n", FICHERO_TRABAJOS, e.getMessage());
+        Document documentoXml = crearDocumentoXml();
+        UtilidadesXml.escribirDocumentoXml(documentoXml, FICHERO_TRABAJOS);
+    }
+
+    private Document crearDocumentoXml() {
+        DocumentBuilder constructor = UtilidadesXml.crearConstructorDocumentoXml();
+        Document documentoXml = null;
+        if (constructor != null) {
+            documentoXml = constructor.newDocument();
+            documentoXml.appendChild(documentoXml.createElement(RAIZ));
+            for (Trabajo trabajo : coleccionTrabajos) {
+                Element elemento = getElemento(documentoXml, trabajo);
+                documentoXml.getDocumentElement().appendChild(elemento);
+            }
         }
+        return documentoXml;
+    }
+
+    private Element getElemento(Document documentoXml, Trabajo trabajo) {
+        Element elementoTrabajo = documentoXml.createElement(TRABAJO);
+        elementoTrabajo.setAttribute(CLIENTE, trabajo.getCliente().getDni());
+        elementoTrabajo.setAttribute(VEHICULO, trabajo.getVehiculo().matricula());
+        elementoTrabajo.setAttribute(FECHA_INICIO, trabajo.getFechaInicio().format(FORMATO_FECHA));
+        if (trabajo.getFechaFin() != null) {
+            elementoTrabajo.setAttribute(FECHA_FIN, trabajo.getFechaFin().format(FORMATO_FECHA));
+        }
+        if (trabajo.getHoras() != 0) {
+            elementoTrabajo.setAttribute(HORAS, String.format("%d", trabajo.getHoras()));
+        }
+        if (trabajo instanceof Revision) {
+            elementoTrabajo.setAttribute(TIPO, REVISION);
+        } else if (trabajo instanceof Mecanico mecanico) {
+            elementoTrabajo.setAttribute(TIPO, MECANICO);
+            if (mecanico.getPrecioMaterial() != 0) {
+                elementoTrabajo.setAttribute(PRECIO_MATERIAL, String.format(Locale.US, "%f", mecanico.getPrecioMaterial()));
+            }
+        }
+        return elementoTrabajo;
     }
 
     @Override
@@ -89,9 +146,9 @@ public class Trabajos implements ITrabajos {
     @Override
     public List<Trabajo> get(Cliente cliente) {
         List<Trabajo> trabajosCliente = new ArrayList<>();
-        for (Trabajo trabajo : coleccionTrabajos) {
-            if (trabajo.getCliente().equals(cliente)) {
-                trabajosCliente.add(trabajo);
+        for (Trabajo Trabajo : coleccionTrabajos) {
+            if (Trabajo.getCliente().equals(cliente)) {
+                trabajosCliente.add(Trabajo);
             }
         }
         return trabajosCliente;
@@ -100,9 +157,9 @@ public class Trabajos implements ITrabajos {
     @Override
     public List<Trabajo> get(Vehiculo vehiculo) {
         List<Trabajo> trabajosVehiculo = new ArrayList<>();
-        for (Trabajo trabajo : coleccionTrabajos) {
-            if (trabajo.getVehiculo().equals(vehiculo)) {
-                trabajosVehiculo.add(trabajo);
+        for (Trabajo Trabajo : coleccionTrabajos) {
+            if (Trabajo.getVehiculo().equals(vehiculo)) {
+                trabajosVehiculo.add(Trabajo);
             }
         }
         return trabajosVehiculo;

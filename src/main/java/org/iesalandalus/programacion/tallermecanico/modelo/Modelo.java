@@ -5,6 +5,7 @@ import org.iesalandalus.programacion.tallermecanico.modelo.dominio.TipoTrabajo;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.Trabajo;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.Vehiculo;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -50,5 +51,5 @@ public interface Modelo {
 
     List<Trabajo> getTrabajos(Vehiculo vehiculo);
 
-    Map<TipoTrabajo, Integer> getEstadisticasMensuales(LocalDate mes);
+    Map<TipoTrabajo, Integer> getEstadisticasMensuales(LocalDate mes) throws IOException;
 }

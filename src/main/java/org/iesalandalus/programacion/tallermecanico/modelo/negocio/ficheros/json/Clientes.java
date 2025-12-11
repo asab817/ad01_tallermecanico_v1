@@ -1,33 +1,33 @@
-package org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.xml;
+package org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.iesalandalus.programacion.tallermecanico.modelo.TallerMecanicoExcepcion;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.Cliente;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.IClientes;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilder;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class Clientes implements IClientes {
-
-    private static final String FICHERO_CLIENTES = String.format("%s%s%s%s%s%s%s", "datos", File.separator, "ficheros", File.separator, "xml", File.separator, "clientes.xml");
-    private static final String RAIZ = "clientes";
-    private static final String CLIENTE = "cliente";
-    private static final String NOMBRE = "nombre";
-    private static final String DNI = "dni";
-    private static final String TELEFONO = "telefono";
+    //Clase clientes
+    private static final String FICHERO_CLIENTES = String.format("%s%s%s%s%s%s%s",
+            "datos", File.separator, "ficheros", File.separator, "json", File.separator, "clientes.json");
 
     private final List<Cliente> coleccionClientes;
     private static Clientes instancia;
+    private final ObjectMapper mapper;
 
     private Clientes() {
         coleccionClientes = new ArrayList<>();
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     static Clientes getInstancia() {
@@ -39,60 +39,40 @@ public class Clientes implements IClientes {
 
     @Override
     public void comenzar() {
-        Document documentoXml = UtilidadesXml.leerDocumentoXml(FICHERO_CLIENTES);
-        if (documentoXml != null) {
-            procesarDocumentoXml(documentoXml);
-            System.out.printf("Fichero %s leído correctamente.%n", FICHERO_CLIENTES);
+        File fichero = new File(FICHERO_CLIENTES);
+        if (!fichero.exists()) {
+            return;
         }
-    }
-
-    private void procesarDocumentoXml(Document documentoXml) {
-        NodeList clientes = documentoXml.getElementsByTagName(CLIENTE);
-        for (int i = 0; i < clientes.getLength(); i++) {
-            Node cliente = clientes.item(i);
-            try {
-                if (cliente.getNodeType() == Node.ELEMENT_NODE) {
-                    insertar(getCliente((Element) cliente));
+        try {
+            List<Cliente> clientesLeidos = mapper.readValue(fichero, new TypeReference<List<Cliente>>() {});
+            coleccionClientes.clear();
+            if (clientesLeidos != null) {
+                for (int i = 0; i < clientesLeidos.size(); i++) {
+                    try {
+                        insertar(clientesLeidos.get(i));
+                    } catch (TallerMecanicoExcepcion | IllegalArgumentException | NullPointerException e) {
+                        System.out.printf("Error al leer el cliente %d. --> %s%n", i, e.getMessage());
+                    }
                 }
-            } catch (TallerMecanicoExcepcion | IllegalArgumentException | NullPointerException e) {
-                System.out.printf("Error al leer el cliente %d. --> %s%n", i, e.getMessage());
             }
+            System.out.printf("Fichero %s leído correctamente.%n", FICHERO_CLIENTES);
+        } catch (IOException e) {
+            System.out.printf("Error al leer el fichero %s. --> %s%n", FICHERO_CLIENTES, e.getMessage());
         }
-    }
-
-    private Cliente getCliente(Element elemento) {
-        String nombre = elemento.getAttribute(NOMBRE);
-        String dni = elemento.getAttribute(DNI);
-        String telefono = elemento.getAttribute(TELEFONO);
-        return new Cliente(nombre, dni, telefono);
     }
 
     @Override
     public void terminar() {
-        Document documentoXml = crearDocumentoXml();
-        UtilidadesXml.escribirDocumentoXml(documentoXml, FICHERO_CLIENTES);
-    }
-
-    private Document crearDocumentoXml() {
-        DocumentBuilder constructor = UtilidadesXml.crearConstructorDocumentoXml();
-        Document documentoXml = null;
-        if (constructor != null) {
-            documentoXml = constructor.newDocument();
-            documentoXml.appendChild(documentoXml.createElement(RAIZ));
-            for (Cliente cliente : coleccionClientes) {
-                Element elemento = getElemento(documentoXml, cliente);
-                documentoXml.getDocumentElement().appendChild(elemento);
-            }
+        File fichero = new File(FICHERO_CLIENTES);
+        File directorio = fichero.getParentFile();
+        if (directorio != null && !directorio.exists()) {
+            directorio.mkdirs();
         }
-        return documentoXml;
-    }
-
-    private Element getElemento(Document documentoXml, Cliente cliente) {
-        Element elemento = documentoXml.createElement(CLIENTE);
-        elemento.setAttribute(NOMBRE, cliente.getNombre());
-        elemento.setAttribute(DNI, cliente.getDni());
-        elemento.setAttribute(TELEFONO, cliente.getTelefono());
-        return elemento;
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(fichero, coleccionClientes);
+        } catch (IOException e) {
+            System.out.printf("Error al escribir en el fichero %s. --> %s%n", FICHERO_CLIENTES, e.getMessage());
+        }
     }
 
     @Override
@@ -140,5 +120,4 @@ public class Clientes implements IClientes {
         }
         coleccionClientes.remove(cliente);
     }
-
 }

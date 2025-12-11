@@ -1,0 +1,16 @@
+[ {
+  "cliente" : {
+    "nombre" : "Patricio",
+    "dni" : "11111111H",
+    "telefono" : "654343231"
+  },
+  "vehiculo" : {
+    "marca" : "Mercedes",
+    "modelo" : "CLS",
+    "matricula" : "7353DXZ"
+  },
+  "fechaInicio" : "2025-12-11",
+  "fechaFin" : null,
+  "horas" : 0,
+  "precioMaterial" : 0.0
+} ]

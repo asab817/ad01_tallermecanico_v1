@@ -3,7 +3,7 @@ package org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros;
 import org.iesalandalus.programacion.tallermecanico.modelo.TallerMecanicoExcepcion;
 import org.iesalandalus.programacion.tallermecanico.modelo.dominio.Vehiculo;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.IVehiculos;
-import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.xml.Vehiculos;
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json.Vehiculos;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

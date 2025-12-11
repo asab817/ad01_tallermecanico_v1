@@ -5,9 +5,9 @@ import org.iesalandalus.programacion.tallermecanico.modelo.negocio.FabricaFuente
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.IClientes;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ITrabajos;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.IVehiculos;
-import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.xml.Clientes;
-import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.xml.Trabajos;
-import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.xml.Vehiculos;
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json.Clientes;
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json.Trabajos;
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json.Vehiculos;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

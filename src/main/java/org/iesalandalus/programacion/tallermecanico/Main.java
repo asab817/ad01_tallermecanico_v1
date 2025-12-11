@@ -4,7 +4,7 @@ import javafx.util.Pair;
 import org.iesalandalus.programacion.tallermecanico.controlador.Controlador;
 import org.iesalandalus.programacion.tallermecanico.controlador.IControlador;
 import org.iesalandalus.programacion.tallermecanico.modelo.FabricaModelo;
-import org.iesalandalus.programacion.tallermecanico.modelo.negocio.FabricaFuenteDatos; // Asumo este nombre de enum
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.FabricaFuenteDatos;
 import org.iesalandalus.programacion.tallermecanico.vista.FabricaVista;
 
 public class Main {
@@ -17,7 +17,7 @@ public class Main {
     private static Pair<FabricaVista, FabricaFuenteDatos> procesarArgumentos(String[] args) {
         FabricaVista fabricaVista = FabricaVista.VENTANAS;
 
-        // 1. POR DEFECTO: se considera que se operará sobre FICHEROS_JSON
+        // 1. Establecemos JSON como la fuente de datos POR DEFECTO
         FabricaFuenteDatos fabricaFuenteDatos = FabricaFuenteDatos.FICHEROS_JSON;
 
         for (String argumento : args) {
@@ -25,7 +25,13 @@ public class Main {
                 fabricaVista = FabricaVista.VENTANAS;
             } else if (argumento.equalsIgnoreCase("-vtexto")) {
                 fabricaVista = FabricaVista.TEXTO;
-            } else if (argumento.equalsIgnoreCase("-fdficherosjson")) {
+            }
+            // 2. Comprobación para XML (FALTABA ESTO)
+            else if (argumento.equalsIgnoreCase("-fdficherosxml")) {
+                fabricaFuenteDatos = FabricaFuenteDatos.FICHEROS_XML;
+            }
+            // 3. Comprobación para JSON explícito
+            else if (argumento.equalsIgnoreCase("-fdficherosjson")) {
                 fabricaFuenteDatos = FabricaFuenteDatos.FICHEROS_JSON;
             }
         }
