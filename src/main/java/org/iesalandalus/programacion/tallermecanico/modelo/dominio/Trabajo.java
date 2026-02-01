@@ -12,7 +12,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 
-// 1. ANOTACIONES PARA POLIMORFISMO (Serialización/Deserialización de Mecanico o Revisión)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
