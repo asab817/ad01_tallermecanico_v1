@@ -11,45 +11,45 @@ import java.util.List;
 import java.util.Map;
 
 public interface Modelo {
-    void comenzar();
+    void comenzar() throws Exception;
 
     void terminar();
 
-    void insertar(Cliente cliente) throws TallerMecanicoExcepcion;
+    void insertar(Cliente cliente) throws Exception;
 
-    void insertar(Vehiculo vehiculo) throws TallerMecanicoExcepcion;
+    void insertar(Vehiculo vehiculo) throws Exception;
 
-    void insertar(Trabajo trabajo) throws TallerMecanicoExcepcion;
+    void insertar(Trabajo trabajo) throws Exception;
 
-    Cliente buscar(Cliente cliente);
+    Cliente buscar(Cliente cliente) throws IOException;
 
-    Vehiculo buscar(Vehiculo vehiculo);
+    Vehiculo buscar(Vehiculo vehiculo) throws IOException;
 
-    Trabajo buscar(Trabajo trabajo);
+    Trabajo buscar(Trabajo trabajo) throws IOException;
 
-    Cliente modificar(Cliente cliente, String nombre, String telefono) throws TallerMecanicoExcepcion;
+    Cliente modificar(Cliente cliente, String nombre, String telefono) throws Exception;
 
-    Trabajo anadirHoras(Trabajo trabajo, int horas) throws TallerMecanicoExcepcion;
+    Trabajo anadirHoras(Trabajo trabajo, int horas) throws TallerMecanicoExcepcion, IOException;
 
-    Trabajo anadirPrecioMaterial(Trabajo trabajo, float precioMaterial) throws TallerMecanicoExcepcion;
+    Trabajo anadirPrecioMaterial(Trabajo trabajo, float precioMaterial) throws TallerMecanicoExcepcion, IOException;
 
-    Trabajo cerrar(Trabajo trabajo, LocalDate fechaFin) throws TallerMecanicoExcepcion;
+    Trabajo cerrar(Trabajo trabajo, LocalDate fechaFin) throws TallerMecanicoExcepcion, IOException;
 
-    void borrar(Cliente cliente) throws TallerMecanicoExcepcion;
+    void borrar(Cliente cliente) throws Exception;
 
-    void borrar(Vehiculo vehiculo) throws TallerMecanicoExcepcion;
+    void borrar(Vehiculo vehiculo) throws Exception;
 
-    void borrar(Trabajo trabajo) throws TallerMecanicoExcepcion;
+    void borrar(Trabajo trabajo) throws Exception;
 
-    List<Cliente> getClientes();
+    List<Cliente> getClientes() throws IOException;
 
-    List<Vehiculo> getVehiculos();
+    List<Vehiculo> getVehiculos() throws IOException;
 
-    List<Trabajo> getTrabajos();
+    List<Trabajo> getTrabajos() throws IOException;
 
-    List<Trabajo> getTrabajos(Cliente cliente);
+    List<Trabajo> getTrabajos(Cliente cliente) throws IOException;
 
-    List<Trabajo> getTrabajos(Vehiculo vehiculo);
+    List<Trabajo> getTrabajos(Vehiculo vehiculo) throws IOException;
 
     Map<TipoTrabajo, Integer> getEstadisticasMensuales(LocalDate mes) throws IOException;
 }

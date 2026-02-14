@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface IVehiculos {
 
-    void comenzar();
+    void comenzar() throws Exception;
 
     void terminar();
 
     List<Vehiculo> get() throws IOException;
 
-    void insertar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException;
+    void insertar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException, Exception;
 
     Vehiculo buscar(Vehiculo vehiculo) throws IOException;
 
-    void borrar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException;
+    void borrar(Vehiculo vehiculo) throws TallerMecanicoExcepcion, IOException, Exception;
 }

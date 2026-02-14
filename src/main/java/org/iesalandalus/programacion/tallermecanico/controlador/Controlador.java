@@ -27,7 +27,7 @@ public class Controlador implements IControlador {
     }
 
     @Override
-    public void comenzar() {
+    public void comenzar() throws Exception {
         modelo.comenzar();
         vista.comenzar();
     }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ITrabajos {
-    void comenzar();
+    void comenzar() throws Exception;
 
     void terminar();
 
@@ -21,7 +21,7 @@ public interface ITrabajos {
 
     Map<TipoTrabajo, Integer> getEstadisticasMensuales(LocalDate mes) throws IOException;
 
-    void insertar(Trabajo trabajo) throws TallerMecanicoExcepcion, IOException;
+    void insertar(Trabajo trabajo) throws TallerMecanicoExcepcion, IOException, Exception;
 
     Trabajo anadirHoras(Trabajo trabajo, int horas) throws TallerMecanicoExcepcion, IOException;
 
@@ -31,5 +31,5 @@ public interface ITrabajos {
 
     Trabajo buscar(Trabajo trabajo) throws IOException;
 
-    void borrar(Trabajo trabajo) throws TallerMecanicoExcepcion, IOException;
+    void borrar(Trabajo trabajo) throws TallerMecanicoExcepcion, IOException, Exception;
 }
