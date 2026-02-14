@@ -1,8 +1,11 @@
+
 package org.iesalandalus.programacion.tallermecanico.modelo.negocio;
 
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficheros.json.FuenteDatosFicherosJSON;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.ficherosxml.FuenteDatosFicherosXML;
+import org.iesalandalus.programacion.tallermecanico.modelo.negocio.mongodb.FuenteDatosMongoDb;
 import org.iesalandalus.programacion.tallermecanico.modelo.negocio.mysql.FuenteDatosFicherosMySQL;
+
 
 public enum FabricaFuenteDatos {
 
@@ -11,21 +14,27 @@ public enum FabricaFuenteDatos {
         public IFuenteDatos crear() {
             return new FuenteDatosFicherosXML();
         }
-    },
 
+    },
     FICHEROS_JSON {
         @Override
         public IFuenteDatos crear() {
             return new FuenteDatosFicherosJSON();
         }
     },
-
     MYSQL {
         @Override
         public IFuenteDatos crear() {
             return new FuenteDatosFicherosMySQL();
         }
+    },
+    MONGODB {
+        @Override
+        public IFuenteDatos crear() {
+            return new FuenteDatosMongoDb();
+        }
     };
+
 
     public abstract IFuenteDatos crear();
 }
